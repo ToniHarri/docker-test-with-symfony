@@ -1,0 +1,75 @@
+version: '3.7'
+services:
+    nginx:
+        image: nginx:1.17.9
+        container_name: docker-test-symfony-nginx
+        volumes:
+            - ./:/var/www/app
+            - .Docker/Nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - .Docker/Nginx/default.conf:/etc/nginx/sites-enabled/default
+        ports:
+            # host:container
+            - 8080:80
+        # "depends_on" - prevents container to start before other container, on
+        # which it depends
+        depends_on:
+            - php-app
+        networks:
+            - docker-test-symfony
+
+    php-app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: docker-test-symfony-phpapp
+        environment:
+            - DATABASE_USER=test_user
+            - DATABASE_PASSWORD=test_user
+            - DATABASE_HOST=docker-test-symfony-mariadb
+            - DATABASE_NAME=test
+        volumes:
+            - ./:/var/www/app
+        networks:
+            - docker-test-symfony
+
+    database:
+        image: mariadb:10.5.2
+        container_name: docker-test-symfony-mariadb
+        environment:
+            - MYSQL_DATABASE=test
+            - MYSQL_ROOT_PASSWORD=root
+        volumes:
+            # This will run the initData.sql script after the server is
+            # initialized. It's good for creating additional databases, users,
+            # etc.
+            - .Docker/MariaDb/initData.sql:/docker-entrypoint-initdb.d/data.sql
+        networks:
+            - docker-test-symfony
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: docker-test-symfony-phpmyadmin
+        volumes:
+            - .Docker/PhpMyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+        ports:
+            - 8081:80
+        depends_on:
+            - database
+        environment:
+            PMA_HOST: database
+        networks:
+            - docker-test-symfony
+networks:
+    docker-test-symfony:
+        external: true
+
+# To build and run:
+# docker network create docker-test
+# docker-compose build --no-cache
+# docker-compose up
+
+# To log into the php-app:
+# docker exec -it docker-test-symfony-phpapp bash
+
+# Nginx+php via socket:
+# https://medium.com/@shrikeh/setting-up-nginx-and-php-fpm-in-docker-with-unix-sockets-6fdfbdc19f91
