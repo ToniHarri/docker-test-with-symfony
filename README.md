@@ -32,3 +32,4 @@ DO NOT USE THIS IN PRODUCTION! IT'S NOT SAFE!
 FUTURE TODO:
 - Php-fpm via unix socket instead of tcp port.
 - Webpack and NPM for front development.
+- Live environment for Symfony inside docker.
