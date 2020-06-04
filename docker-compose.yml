@@ -79,6 +79,3 @@ networks:
 
 # To log into the php-app:
 # docker exec -it docker-test-symfony-phpapp bash
-
-# Nginx+php via socket:
-# https://medium.com/@shrikeh/setting-up-nginx-and-php-fpm-in-docker-with-unix-sockets-6fdfbdc19f91
