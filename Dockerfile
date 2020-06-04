@@ -15,14 +15,12 @@ COPY .Docker/Php/php.ini $PHP_INI_DIR/conf.d/
 
 # PHP extension zip requires libzip
 # intl requires libicu-dev
-# gd requires libpng-dev
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libicu-dev \
     libzip-dev \
     zip \
-    unzip \
-    libpng-dev
+    unzip
 
 # Install required PHP Core extensions for Symfony and dependencies to run
 RUN docker-php-ext-install bcmath
@@ -35,8 +33,7 @@ RUN docker-php-ext-configure intl \
 RUN docker-php-ext-configure opcache --enable-opcache \
     && docker-php-ext-install opcache
 RUN docker-php-ext-install mysqli pdo pdo_mysql
-# Dompdf requirements (or optional dependencies which improve performance)
-RUN docker-php-ext-install gd
+
 
 # Install and run composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

@@ -9,7 +9,7 @@ services:
             - .Docker/Nginx/default.conf:/etc/nginx/sites-enabled/default
         ports:
             # host:container
-            - 8080:80
+            - 8070:80
         # "depends_on" - prevents container to start before other container, on
         # which it depends
         depends_on:
@@ -23,10 +23,12 @@ services:
             dockerfile: Dockerfile
         container_name: docker-test-symfony-phpapp
         environment:
-            - DATABASE_USER=test_user
-            - DATABASE_PASSWORD=test_user
-            - DATABASE_HOST=docker-test-symfony-mariadb
-            - DATABASE_NAME=test
+            - DATABASE_USER=${DATABASE_USER}
+            - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+            - DATABASE_HOST=${DATABASE_HOST}
+            - DATABASE_NAME=${DATABASE_NAME}
+            - SMTP_HOST=${SMTP_HOST}
+            - SMTP_PORT=${SMTP_PORT}
         volumes:
             - ./:/var/www/app
         networks:
@@ -36,7 +38,7 @@ services:
         image: mariadb:10.5.2
         container_name: docker-test-symfony-mariadb
         environment:
-            - MYSQL_DATABASE=test
+            - MYSQL_DATABASE=${DATABASE_NAME}
             - MYSQL_ROOT_PASSWORD=root
         volumes:
             # This will run the initData.sql script after the server is
@@ -52,19 +54,26 @@ services:
         volumes:
             - .Docker/PhpMyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
         ports:
-            - 8081:80
+            - 8071:80
         depends_on:
             - database
         environment:
             PMA_HOST: database
         networks:
             - docker-test-symfony
+
+    mailcatcher:
+        image: tophfr/mailcatcher
+        ports:
+            - 1070:80
+            - 1025:25
+        networks:
+            - docker-test-symfony
+
 networks:
     docker-test-symfony:
-        external: true
 
 # To build and run:
-# docker network create docker-test
 # docker-compose build --no-cache
 # docker-compose up
 
